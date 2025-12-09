@@ -29,6 +29,7 @@ setup(
     install_requires=[
         "kurigram",
         "tgcrypto",
+        "pyrogram"
     ],
     keywords=["pyrogram", "telegram", "bot", "pagination", "help-menu"],
 )
