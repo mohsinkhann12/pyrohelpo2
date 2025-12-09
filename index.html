@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyroHelpo - A Powerful Pagination Library For PyroGram</title>
+    <meta name="description" content="PyroHelpo: A powerful and flexible pagination library for Pyrogram bots that automatically handles help commands and module organization.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PyroHelpo">
+    <meta name="twitter:description" content="A Powerful Pagination Library For PyroGram">
+    <meta name="twitter:image" content="https://socialify.git.ci/Vishal-1756/pyrohelpo/image?description=1&font=KoHo&name=1&owner=1&pattern=Charlie%20Brown&theme=Dark">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00ff9d;
+            --secondary-color: #03dac6;
+            --background-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-color: #ffffff;
+            --code-background: #2d2d2d;
+            --menu-width: 250px;
+            --menu-background: rgba(18, 18, 18, 0.95);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            overflow-x: hidden;
+        }
+        #stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 10px;
+            display: none;
+        }
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--primary-color);
+            margin: 5px 0;
+            transition: 0.4s;
+            border-radius: 3px;
+        }
+        
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--menu-width);
+            background: var(--menu-background);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            padding-top: 80px;
+        }
+        .nav-menu.active {
+            transform: translateX(0);
+        }
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+        .nav-menu ul li {
+            padding: 15px 30px;
+        }
+        .nav-menu ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+        .nav-menu ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        .desktop-header {
+            background: var(--menu-background);
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 998;
+        }
+        .desktop-header ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        .desktop-header ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .desktop-header ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        main {
+            margin-top: 80px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @media (max-width: 1024px) {
+            .desktop-header {
+                display: none;
+            }
+            .hamburger-menu {
+                display: block;
+            }
+            .nav-menu {
+                width: var(--menu-width);
+            }
+            main {
+                margin-left: 0;
+            }
+        }
+        
+        section {
+            margin-bottom: 50px;
+            background: var(--surface-color);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+        }
+        h2 {
+            font-size: 2em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        h3 {
+            font-size: 1.5em;
+        }
+        .code-block {
+            position: relative;
+            background: var(--code-background);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--primary-color);
+            display: block;
+            white-space: pre-wrap;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--primary-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: opacity 0.3s;
+        }
+        .copy-btn:hover {
+            opacity: 0.9;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .gallery img {
+            width: 100%;
+            border-radius: 8px;
+            transition: transform 0.3s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .badge-blue { background-color: #007bff; }
+        .badge-green { background-color: #28a745; }
+        .badge-yellow { background-color: #ffc107; color: #000; }
+    </style>
+</head>
+<body>
+    <canvas id="stars"></canvas>
+    
+    <button class="hamburger-menu" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
+    <nav class="nav-menu" id="navMenu">
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#usage">Usage</a></li>
+            <li><a href="#customization">Customization</a></li>
+            <li><a href="#methods">Methods</a></li>
+            <li><a href="#error-handling">Error Handling</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#contributors">Contributors</a></li>
+        </ul>
+    </nav>
+    
+    <header class="desktop-header">
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#usage">Usage</a></li>
+            <li><a href="#customization">Customization</a></li>
+            <li><a href="#methods">Methods</a></li>
+            <li><a href="#error-handling">Error Handling</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#contributors">Contributors</a></li>
+        </ul>
+    </header>
+
+    <main class="container">
+        <section id="home">
+            <h1>PyroHelpo Documentation</h1>
+            <p>A powerful and flexible pagination library for Pyrogram bots that automatically handles help commands and module organization.</p>
+            <div class="badges">
+                <span class="badge badge-blue">Python 3.7+</span>
+                <span class="badge badge-green">Pyrogram 2.0+</span>
+                <span class="badge badge-yellow">MIT License</span>
+            </div>
+        </section>
+
+        <section id="features">
+            <h2>Features</h2>
+            <ul>
+                <li>🔄 Automatic module discovery and help text organization</li>
+                <li>📱 Beautiful paginated help menus with inline buttons</li>
+                <li>🎯 Support for both command-based and button-based help</li>
+                <li>🎨 Customizable button layouts and texts</li>
+                <li>🔌 Easy integration with existing Pyrogram bots</li>
+                <li>📝 Support for rich media in help messages (photos, videos)</li>
+                <li>🔗 Deep linking support for direct access to help menus</li>
+                <li>🌐 Group chat support with private message options</li>
+                <li>🎭 Flexible parse mode selection</li>
+                <li>🖼️ Media support with photo and video options</li>
+            </ul>
+        </section>
+
+        <section id="installation">
+            <h2>Installation</h2>
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                <code>pip install pyrohelpo</code>
+            </div>
+        </section>
+
+        <section id="usage">
+            <h2>Usage</h2>
+            <h3>Basic Setup</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                <code>
+from pyrogram import Client
+from Helpo import Helpo
+from pyrogram.enums import ParseMode
+
+# Initialize your Pyrogram client
+app = Client("my_bot")
+
+# Initialize Helpo
+helpo = Helpo(
+    client=app,
+    modules_path="plugins",
+    buttons_per_page=6
+)
+                </code>
+            </div>
+            <h3>Advanced Configuration</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                <code>
+custom_texts = {
+    "help_menu_title": "**🛠 Custom Help Menu**",
+    "help_menu_intro": "Available modules ({count}):\n{modules}\n\nTap on a module to explore.",
+    "module_help_title": "**🔍 Details for {module_name} Module**",
+    "module_help_intro": "Description:\n{help_text}",
+    "no_modules_loaded": "⚠️ No modules available at the moment.",
+    "back_button": "◀️ Go Back",
+    "prev_button": "⬅️ Previous Page",
+    "next_button": "➡️ Next Page",
+    "support_button": "💬 Contact Support",
+    "support_url": "https://t.me/YourSupportBot",
+    "short_help": True,
+    "support_as_callback": True,
+    "support_c_back_name": "say_hi"
+}
+
+helpo = Helpo(
+    client=app,
+    modules_path="plugins",
+    buttons_per_page=6,
+    texts=custom_texts,
+    help_var="HELP",
+    module_var="MODULE",
+    photo="path/to/photo.jpg",  # Optional: Add photo to help messages
+    video="path/to/video.mp4",  # Optional: Add video to help messages
+    parse_mode=ParseMode.HTML,  # Optional: Change parse mode (default: MARKDOWN)
+    disable_web_page_preview=False,  # Optional: Enable web preview (default: True)
+    short_help=True  # Optional: Enable short help mode
+)
+                </code>
+            </div>
+            <h3>Module Setup</h3>
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                <code>
+MODULE = "Admin"  # Module name displayed in help menu
+HELP = """
+**Admin Commands**
+/ban - Ban a user
+/unban - Unban a user
+/mute - Mute a user
+/unmute - Unmute a user
+"""
+                </code>
+            </div>
+        </section>
+
+        <section id="customization">
+            <h2>Customization Options</h2>
+            <p>PyroHelpo offers various customization options to tailor the help menu to your bot's needs:</p>
+            <ul>
+                <li><code>buttons_per_page</code>: Set the number of buttons displayed per page (default: 6)</li>
+                <li><code>texts</code>: Customize all text messages and button labels</li>
+                <li><code>help_var</code> and <code>module_var</code>: Set custom variable names for help text and module names</li>
+                <li><code>photo</code> and <code>video</code>: Add rich media to your help messages</li>
+                <li><code>parse_mode</code>: Set the parse mode for help messages (default: ParseMode.MARKDOWN)</li>
+                <li><code>disable_web_page_preview</code>: Enable or disable web page previews in help messages</li>
+                <li><code>short_help</code>: Enable or disable short help mode for concise module descriptions</li>
+            </ul>
+        </section>
+
+        <section id="methods">
+            <h2>Methods and Attributes</h2>
+            <h3>Helpo Class</h3>
+            <h4>Attributes:</h4>
+            <ul>
+                <li><code>client</code>: Pyrogram Client instance</li>
+                <li><code>modules_path</code>: Path to modules directory</li>
+                <li><code>buttons_per_page</code>: Number of buttons per page</li>
+                <li><code>help_var</code>: Variable name for help text (default: "**HELP**")</li>
+                <li><code>module_var</code>: Variable name for module name (default: "**MODULE**")</li>
+                <li><code>photo</code>: Optional photo URL/path</li>
+                <li><code>video</code>: Optional video URL/path</li>
+                <li><code>parse_mode</code>: Message parse mode</li>
+                <li><code>disable_web_page_preview</code>: Web preview setting</li>
+                <li><code>texts</code>: Customizable text dictionary</li>
+                <li><code>short_help</code>: Boolean to enable short help mode</li>
+            </ul>
+            <h4>Methods:</h4>
+            <ul>
+                <li><code>load_modules()</code>: Loads all modules from the specified path</li>
+                <li><code>show_help_menu(chat_id: int, page: int = 1, message_id: int = None)</code>: Displays the main help menu</li>
+                <li><code>show_module_help(query_or_message, module_name: str)</code>: Shows help for a specific module</li>
+                <li><code>send_message(chat_id: int, text: str, reply_markup: InlineKeyboardMarkup = None, message_id: int = None)</code>: Sends a message with optional media and keyboard</li>
+                <li><code>monkeypatch_client()</code>: Patches the Pyrogram client to handle the `/help` command</li>
+            </ul>
+        </section>
+
+        <section id="error-handling">
+            <h2>Error Handling</h2>
+            <p>PyroHelpo includes comprehensive error handling for:</p>
+            <ul>
+                <li>Invalid module files</li>
+                <li>Missing required attributes</li>
+                <li>Media loading failures</li>
+                <li>Message sending errors</li>
+                <li>Callback query processing</li>
+            </ul>
+        </section>
+
+        <section id="gallery">
+            <h2>Gallery</h2>
+            <div class="gallery">
+                <img src="https://i.ibb.co/W6GSqRx/b8a4679a3f10.jpg" alt="Help menu using video">
+                <img src="https://i.ibb.co/Ct5P1jQ/68a1de1130d3.jpg" alt="Help menu using only text">
+                <img src="https://i.ibb.co/H70SLgQ/741d52da8c46.jpg" alt="Help menu using photo">
+                <img src="https://i.ibb.co/BzFD1kj/ad4c32676c6e.jpg" alt="Help menu of a module">
+            </div>
+        </section>
+
+        <section id="contributors">
+            <h2>Contributors</h2>
+            <ul>
+                <li><a href="https://github.com/vishal-1756">vishal-1756</a></li>
+                <li><a href="https://github.com/siyu-xd">siyu-xd</a></li>
+            </ul>
+        </section>
+
+        <section id="support">
+            <h2>Support</h2>
+            <p>Need help? Join our <a href="https://t.me/Blank_Advice">support chat</a> or create an issue on our <a href="https://github.com/Vishal-1756/Helpo">GitHub repository</a>.</p>
+        </section>
+    </main>
+
+    <script>
+        // Star animation
+        const canvas = document.getElementById('stars');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Star {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 3 - 1.5;
+                this.twinkleSpeed = Math.random() * 0.1;
+                this.twinklePhase = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+                this.twinklePhase += this.twinkleSpeed;
+            }
+            draw() {
+                const twinkle = Math.sin(this.twinklePhase) * 0.5 + 0.5;
+                ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push(new Star());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Copy button functionality
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const codeBlock = button.nextElementSibling;
+                const range = document.createRange();
+                range.selectNode(codeBlock);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Hamburger Menu Functionality
+        const hamburger = document.querySelector('.hamburger-menu');
+        const navMenu = document.querySelector('.nav-menu');
+        let isMenuOpen = false;
+
+        hamburger.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            navMenu.classList.toggle('active');
+            hamburger.setAttribute('aria-expanded', isMenuOpen);
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.nav-menu') && 
+                !event.target.closest('.hamburger-menu') && 
+                isMenuOpen) {
+                navMenu.classList.remove('active');
+                isMenuOpen = false;
+                hamburger.setAttribute('aria-expanded', false);
+            }
+        });
+
+        // Close menu when a link is clicked
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                isMenuOpen = false;
+                hamburger.setAttribute('aria-expanded', false);
+            });
+        });
+
+        // Hover functionality for tablets
+        if (window.matchMedia('(hover: hover)').matches) {
+            navMenu.addEventListener('mouseenter', () => {
+                navMenu.classList.add('active');
+            });
+            
+            navMenu.addEventListener('mouseleave', () => {
+                if (!isMenuOpen) {
+                    navMenu.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

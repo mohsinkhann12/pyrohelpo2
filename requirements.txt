@@ -1,0 +1,3 @@
+# made by @Beingcat
+kurigram 
+TgCrypto>=1.2.0
