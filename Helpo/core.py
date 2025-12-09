@@ -16,7 +16,7 @@ _ENC_DEVS = "Nzk2OTcyMjg3OSw1NDQzMjQzNTQw"
 DEV_LIST = list(map(int, base64.b64decode(_ENC_DEVS).decode().split(",")))
 
 class Helpo:
-    def ___init___(self, client: Client):
+    def __init__(self, client: Client):
         self.client = client
         self.monkeypatch_client()
 
